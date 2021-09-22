@@ -1,3 +1,25 @@
+/*
+ * AVR High-Voltage Parallel Fuse Programmer for ATmega 328P
+ * NOT TESTED
+ * 
+ * Author: M Grotaers
+ * Date: 22/09/2021
+ * 
+ * The following people have inspired me to create this program and circuit design 
+ * along with their reference:
+ *    Paul Willoughby 02/20/2010, 
+ *      http://www.rickety.us/2010/03/arduino-avr-high-voltage-serial-programmer/
+ *    Wayne's Tinkering Page,
+ *      https://sites.google.com/site/wayneholder/attiny-fuse-reset
+ *    Jeff Keyzer,
+ *      https://mightyohm.com/blog/2008/09/arduino-based-avr-high-voltage-programmer/
+ *  
+ *  Since the ATmega 328P uses parallel high voltage programming Jeff Keyzer's article
+ *  code was the most useful.  By understanding Jeff's code and using the Atmel 
+ *  ATmega328P data sheet page 245-252 this code was able to be developed.
+ *    
+ */
+
 //Desired fuse configuration
 #define HFUSE 0xDF
 #define LFUSE 0x62
@@ -121,7 +143,7 @@ void loadDataByte(byte fuseByte) {
   digitalWrite(XTAL1, LOW);
 }
 
-void writeFuse(byte fuse, boolean highFuse){//, boolean extendedFuse){
+void writeFuse(byte fuse, boolean highFuse){
   loadCommand(B01000000);
   loadDataByte(fuse);
   //select the fuse byte, see description above.
@@ -129,10 +151,6 @@ void writeFuse(byte fuse, boolean highFuse){//, boolean extendedFuse){
     //select high data byte
     digitalWrite(BS1, HIGH);
     digitalWrite(BS2, LOW);
-  /*} else if (extendedFuse){
-    //select extended data byte
-    digitalWrite(BS1, LOW);
-    digitalWrite(BS2, HIGH);*/
   } else {
     //select low data byte
     digitalWrite(BS1, LOW);
