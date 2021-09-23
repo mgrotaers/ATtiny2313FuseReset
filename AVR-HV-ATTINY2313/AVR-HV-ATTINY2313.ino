@@ -28,7 +28,8 @@ void setup() {
   Serial.println("ATtiny2313 High Voltage Parallel Programming Fuse Bits.");
   Serial.println("Select option from menu:");
   Serial.println("Press '1' to program high and low fuse bits");
-  Serial.println("Press '2' to read fuse and lock bits");
+  Serial.println("Press '2' to program high and low fuse bits, and to read fuse and lock bits");
+  Serial.println("Press '3' to read fuse and lock bits");
 }
 
 void loop() {
@@ -41,6 +42,9 @@ void loop() {
     if(menuOption == 1){
       Serial.println("Programming High and Low Fuse Bits");
     } else if (menuOption == 2){
+      Serial.println("Programming High and Low Fuse Bits");
+      Serial.println("Reading Fuse and Lock Bits");
+    } else if (menuOption == 3){
       Serial.println("Reading Fuse and Lock Bits");
     }
     
