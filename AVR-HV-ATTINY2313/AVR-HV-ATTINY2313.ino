@@ -110,6 +110,7 @@ void loop() {
 }
 
 void enterProg(){
+  
   //Initialise Pins for Programming Mode
   digitalWrite(WR, HIGH); //prog_enable pin
   digitalWrite(XA1, LOW); //prog_enable pin
@@ -124,6 +125,23 @@ void enterProg(){
   digitalWrite(RST, LOW); //Apply +12V
   delayMicroseconds(10);  //Wait before changing prog_enable pins
   delayMicroseconds(300);  //Wait before any parallel programming commands
+}
+
+void exitProg(){
+  //Exit Programming Mode by power down device or reset pin to 0V.
+  digitalWrite(RST, HIGH); //0V
+
+  //Turn off all outputs
+  DATA = 0x00;
+  DATAD = 0xFF; // Set digital pins 0-7 as outputs for programming
+  delayMicroseconds(5);
+  
+  digitalWrite(OE, LOW); //Set to 1 if reading fuse bits
+  digitalWrite(WR, LOW); //prog_enable pin
+  digitalWrite(XA1, LOW); //prog_enable pin
+  digitalWrite(XA0, LOW); //prog_enable pin
+  digitalWrite(BS1, LOW); //prog_enable pin
+  digitalWrite(VCC, LOW);
 }
 
 void progFuses(){
@@ -144,7 +162,7 @@ void readFuses(){
   digitalWrite(XA1, LOW);//BS2
   digitalWrite(BS1, LOW);
   Serial.print("LFUSE: ");
-  Serial.println(digitalRead(DATA));
+  Serial.println(DATA);
   //Read Fuse High Bit
   digitalWrite(XA1, HIGH);//BS2
   digitalWrite(BS1, HIGH);
@@ -164,20 +182,27 @@ void readFuses(){
   
 }
 
-void exitProg(){
-  //Exit Programming Mode by power down device or reset pin to 0V.
-  digitalWrite(RST, HIGH); //0V
-
-  //Turn off all outputs
-  DATA = 0x00;
-  
-  digitalWrite(OE, LOW); //Set to 1 if reading fuse bits
-  digitalWrite(WR, LOW); //prog_enable pin
-  digitalWrite(XA1, LOW); //prog_enable pin
-  digitalWrite(XA0, LOW); //prog_enable pin
-  digitalWrite(BS1, LOW); //prog_enable pin
-  digitalWrite(VCC, LOW);
+void writeFuse(byte fuse, boolean highFuse){
+  loadCommand(B01000000);
+  loadDataByte(fuse);
+  //select the fuse byte, see description above.
+  if (highFuse){
+    //select high data byte
+    digitalWrite(BS1, HIGH);
+  } else {
+    //select low data byte
+    digitalWrite(BS1, LOW);
+  }
+  //give WR negative pulse and wait for RDY to go high
+  digitalWrite(WR, HIGH);
+  delay(1);
+  digitalWrite(WR, LOW);
+  while(digitalRead(RDY, LOW){
+    delay(1);
+  }
 }
+
+
 
 
 //A: Load Command
@@ -208,22 +233,4 @@ void loadDataByte(byte fuseByte) {
   digitalWrite(XTAL1, LOW);
 }
 
-void writeFuse(byte fuse, boolean highFuse){
-  loadCommand(B01000000);
-  loadDataByte(fuse);
-  //select the fuse byte, see description above.
-  if (highFuse){
-    //select high data byte
-    digitalWrite(BS1, HIGH);
-  } else {
-    //select low data byte
-    digitalWrite(BS1, LOW);
-  }
-  //give WR negative pulse and wait for RDY to go high
-  digitalWrite(WR, HIGH);
-  delay(1);
-  digitalWrite(WR, LOW);
-  while(digitalRead(RDY, LOW){
-    delay(1);
-  }
-}
+
