@@ -44,7 +44,7 @@ int menuOption = 0; // for incoming serial data
 void setup() {
   // Setup control line for HV parallel programming from Arduino perspective
   DATA = 0x00; // Clear digital pins 0-7
-  DATAD = 0xFF; // Set digital pins 0-7 as outputs
+  DATAD = 0xFF; // Set digital pins 0-7 as outputs for programming
   pinmode(VCC, OUTPUT);
   pinmode(RDY, INPUT);
   pinmode(OE, OUTPUT); //Inverted
@@ -97,6 +97,12 @@ void loop() {
       
     } else if (menuOption == 3){
       Serial.println("Reading Fuse and Lock Bits");
+      //Enter Programming Mode
+      enterProg();
+      //In Programming Mode
+      readFuses(); //read fuse bits
+      //Exit Programming Mode
+      exitProg();
     }
     
   }
@@ -129,6 +135,32 @@ void progFuses(){
 }
 
 void readFuses(){
+  loadCommand(B00000100);
+  //Start Read
+  DATAD = 0x00; //Set digital pins to input for reading
+  delayMicroseconds(5);
+  digitalWrite(OE, HIGH);
+  //Read Fuse Low Bit
+  digitalWrite(XA1, LOW);//BS2
+  digitalWrite(BS1, LOW);
+  Serial.print("LFUSE: ");
+  Serial.println(digitalRead(DATA));
+  //Read Fuse High Bit
+  digitalWrite(XA1, HIGH);//BS2
+  digitalWrite(BS1, HIGH);
+  Serial.print("HFUSE: ");
+  Serial.println(DATA);
+  //Read Fuse Extended Bit
+  digitalWrite(XA1, HIGH);//BS2
+  digitalWrite(BS1, LOW);
+  Serial.print("EFUSE: ");
+  Serial.println(DATA);
+  //Finish Read
+  DATAD = 0xFF; //Set digital pins to output for programming
+  delayMicroseconds(5);
+  digitalWrite(OE, LOW);
+  digitalWrite(XA1, LOW);
+  digitalWrite(BS1, LOW);
   
 }
 
