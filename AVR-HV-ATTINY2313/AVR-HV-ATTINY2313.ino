@@ -27,7 +27,7 @@ int menuOption = 0; // for incoming serial data
 #define LFUSE 0xE4
 
 //Pin Assignment on Arduino
-#define DATA PORTB //Digital Pins 0-7
+#define DATA PORTB //Digital Pins 0-7 as output DATA
 #define DATAD DDRB //Data direction register for DATA port
 
 #define VCC     8
@@ -162,17 +162,17 @@ void readFuses(){
   digitalWrite(XA1, LOW);//BS2
   digitalWrite(BS1, LOW);
   Serial.print("LFUSE: ");
-  Serial.println(DATA);
+  Serial.println(PINB);
   //Read Fuse High Bit
   digitalWrite(XA1, HIGH);//BS2
   digitalWrite(BS1, HIGH);
   Serial.print("HFUSE: ");
-  Serial.println(DATA);
+  Serial.println(PINB);
   //Read Fuse Extended Bit
   digitalWrite(XA1, HIGH);//BS2
   digitalWrite(BS1, LOW);
   Serial.print("EFUSE: ");
-  Serial.println(DATA);
+  Serial.println(PINB);
   //Finish Read
   DATAD = 0xFF; //Set digital pins to output for programming
   delayMicroseconds(5);
