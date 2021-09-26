@@ -105,6 +105,8 @@ void loop() {
     //Exit Programming Mode
     exitProg();
   }
+  
+  menuOption = 0;
 
 }
 
