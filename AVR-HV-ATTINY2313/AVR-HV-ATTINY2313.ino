@@ -23,8 +23,8 @@
 int menuOption = 0; // for incoming serial data
 
 //Desired fuse configuration
-#define HFUSE 0xDB 
-#define LFUSE 0xE4
+#define HFUSE 0xDF 
+#define LFUSE 0x64
 
 //Pin Assignment on Arduino
 #define DATA PORTB //Digital Pins 0-7 as output DATA
@@ -73,38 +73,37 @@ void loop() {
   if (Serial.available() > 0) {
     // read the incoming byte:
     menuOption = Serial.read();
+  }
 
-    // say what you got:
-    if(menuOption == 1){
-      Serial.println("Programming High and Low Fuse Bits");
-      //Enter Programming Mode
-      enterProg();
-      //In Programming Mode
-      progFuses();
-      //Exit Programming Mode
-      exitProg();
+  // say what you got:
+  if(menuOption == '1'){
+    Serial.println("Programming High and Low Fuse Bits");
+    //Enter Programming Mode
+    enterProg();
+    //In Programming Mode
+    progFuses();
+    //Exit Programming Mode
+    exitProg();
       
-    } else if (menuOption == 2){
-      Serial.println("Programming High and Low Fuse Bits");
-      Serial.println("Reading Fuse and Lock Bits");
-      //Enter Programming Mode
-      enterProg();
-      //In Programming Mode
-      progFuses();  //program fuse bits
-      readFuses(); //read fuse bits
-      //Exit Programming Mode
-      exitProg();
-      
-    } else if (menuOption == 3){
-      Serial.println("Reading Fuse and Lock Bits");
-      //Enter Programming Mode
-      enterProg();
-      //In Programming Mode
-      readFuses(); //read fuse bits
-      //Exit Programming Mode
-      exitProg();
-    }
+  } else if (menuOption == '2'){
+    Serial.println("Programming High and Low Fuse Bits");
+    Serial.println("Reading Fuse and Lock Bits");
+    //Enter Programming Mode
+    enterProg();
+    //In Programming Mode
+    progFuses();  //program fuse bits
+    readFuses(); //read fuse bits
+    //Exit Programming Mode
+    exitProg();
     
+  } else if (menuOption == '3'){
+    Serial.println("Reading Fuse and Lock Bits");
+    //Enter Programming Mode
+    enterProg();
+    //In Programming Mode
+    readFuses(); //read fuse bits
+    //Exit Programming Mode
+    exitProg();
   }
 
 }
