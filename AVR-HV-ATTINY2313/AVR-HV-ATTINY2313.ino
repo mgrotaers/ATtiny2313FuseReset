@@ -37,17 +37,16 @@ void loop() {
   if (Serial.available() > 0) {
     // read the incoming byte:
     menuOption = Serial.read();
-
-    // say what you got:
-    if(menuOption == 1){
-      Serial.println("Programming High and Low Fuse Bits");
-    } else if (menuOption == 2){
-      Serial.println("Programming High and Low Fuse Bits");
-      Serial.println("Reading Fuse and Lock Bits");
-    } else if (menuOption == 3){
-      Serial.println("Reading Fuse and Lock Bits");
-    }
-    
+  }
+  
+  // say what you got:
+  if(menuOption == '1'){
+    Serial.println("Programming High and Low Fuse Bits");
+  } else if (menuOption == '2'){
+    Serial.println("Programming High and Low Fuse Bits");
+    Serial.println("Reading Fuse and Lock Bits");
+  } else if (menuOption == '3'){
+    Serial.println("Reading Fuse and Lock Bits");
   }
 
 }
