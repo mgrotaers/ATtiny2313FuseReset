@@ -45,15 +45,15 @@ void setup() {
   // Setup control line for HV parallel programming from Arduino perspective
   DATA = 0x00; // Clear digital pins 0-7
   DATAD = 0xFF; // Set digital pins 0-7 as outputs for programming
-  pinmode(VCC, OUTPUT);
-  pinmode(RDY, INPUT);
-  pinmode(OE, OUTPUT); //Inverted
-  pinmode(WR, OUTPUT); //Inverted
-  pinmode(BS1, OUTPUT);
-  pinmode(XA0, OUTPUT);
-  pinmode(XA1, OUTPUT);
-  pinmode(RST, OUTPUT); //+12V Signal to chip, Inverted
-  pinmode(XTAL1, OUTPUT);
+  pinMode(VCC, OUTPUT);
+  pinMode(RDY, INPUT);
+  pinMode(OE, OUTPUT); //Inverted
+  pinMode(WR, OUTPUT); //Inverted
+  pinMode(BS1, OUTPUT);
+  pinMode(XA0, OUTPUT);
+  pinMode(XA1, OUTPUT);
+  pinMode(RST, OUTPUT); //+12V Signal to chip, Inverted
+  pinMode(XTAL1, OUTPUT);
   
   //Initialise output pin RST so 12V is shut off at 0V
   digitalWrite(RST, HIGH);
@@ -198,7 +198,7 @@ void writeFuse(byte fuse, boolean highFuse){
   digitalWrite(WR, HIGH);
   delay(1);
   digitalWrite(WR, LOW);
-  while(digitalRead(RDY, LOW){
+  while(digitalRead(RDY) == LOW){
     delay(1);
   }
 }
