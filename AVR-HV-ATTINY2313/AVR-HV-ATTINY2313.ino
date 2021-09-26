@@ -48,5 +48,7 @@ void loop() {
   } else if (menuOption == '3'){
     Serial.println("Reading Fuse and Lock Bits");
   }
+  
+  menuOption = 0;
 
 }
