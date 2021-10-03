@@ -4,8 +4,12 @@ At moment this is starting the framework for developing the arduino code.
 
 **NOTE, SOME CODE IS UNTESTED.**
 
+**Files in AVR-HV-328P are untested.  This was used as a base point for ATtiny2313.**
 
-
+**Files in AVR-HV-ATTINY2313 has been tested with issues.  Capabilities are:**
+  - Program will read fuses but will not write fuses.
+  - This could be issue with the chip I am trying to save.
+  - File AVR-HV-ATTINY2313.ino will be commented with potential issues.
 
 
 The development of this project was created to unlock a ATtiny2313 chip.
