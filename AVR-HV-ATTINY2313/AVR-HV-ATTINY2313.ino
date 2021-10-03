@@ -200,6 +200,7 @@ void writeFuse(byte fuse, boolean highFuse){
   delay(1);
   digitalWrite(WR, LOW);
   while(digitalRead(RDY) == LOW){
+    //Potential issue and hanging.  Need to debug.
     delay(1);
   }
 }
