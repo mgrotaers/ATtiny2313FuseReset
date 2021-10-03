@@ -1,3 +1,4 @@
+
 /*
  * AVR High-Voltage Parallel Fuse Programmer for ATtiny2313
  * 
@@ -204,8 +205,6 @@ void writeFuse(byte fuse, boolean highFuse){
 }
 
 
-
-
 //A: Load Command
 void loadCommand (byte command){
   //Enable command loading
@@ -233,5 +232,4 @@ void loadDataByte(byte fuseByte) {
   delay(1);
   digitalWrite(XTAL1, LOW);
 }
-
 
