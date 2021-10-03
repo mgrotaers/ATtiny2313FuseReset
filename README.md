@@ -1,7 +1,9 @@
 # ATtiny2313 High Voltage Parallel Programming Fuse Reset
 
 At moment this is starting the framework for developing the arduino code.
-# CODE CURRENTLY NOT TESTED.
+NOTE, SOME CODE IS UNTESTED.
+
+
 
 The development of this project was created to unlock a ATtiny2313 chip.
 
