@@ -1,7 +1,10 @@
 # ATtiny2313 High Voltage Parallel Programming Fuse Reset
 
-At moment this is starting the framework for developing the arduino code.
-NOTE, SOME CODE IS UNTESTED.
+At moment this is starting the framework for developing the arduino code.  
+
+**NOTE, SOME CODE IS UNTESTED.**
+
+
 
 
 
