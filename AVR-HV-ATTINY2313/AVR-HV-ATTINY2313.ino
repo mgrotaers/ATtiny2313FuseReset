@@ -67,6 +67,7 @@ void setup() {
   Serial.println("Press '1' to program high and low fuse bits");
   Serial.println("Press '2' to program high and low fuse bits, and to read fuse and lock bits");
   Serial.println("Press '3' to read fuse and lock bits");
+  Serial.println("Press '8' to conduct chip erase");
 }
 
 void loop() {
@@ -105,6 +106,14 @@ void loop() {
     readFuses(); //read fuse bits
     //Exit Programming Mode
     exitProg();
+  } else if (menuOption == '8'){
+    //Enter Programming Mode
+    enterProg();
+    //In Programming Mode conduct Chip Erase
+    chipErase(); //conduct chip erase
+    //Exit Programming Mode
+    exitProg();
+   
   }
   
   menuOption = 0;
@@ -212,9 +221,42 @@ void writeFuse(byte fuse, boolean highFuse){
   print("RDY: ");
   println(digitalRead(RDY));
   int count = 0;
-  while(digitalRead(RDY) == LOW & count<=20){
+  while(digitalRead(RDY) == LOW & count<=10){
     //Potential issue and hanging.  Need to debug.
-    delay(1);
+    delay(10);
+    count++;
+    // debug RDY
+    print("RDY: ");
+    println(digitalRead(RDY));
+  }
+  // debug RDY
+  print("RDY: ");
+  println(digitalRead(RDY));
+}
+
+void chipErase(){
+  //Enable command loading
+  digitalWrite(XA1, HIGH);
+  digitalWrite(XA0, LOW);
+
+  digitalWrite(BS1, LOW);
+  //Write Command
+  DATA = B10000000;
+  //Load Command by giving XTAL1 positive pulse
+  digitalWrite(XTAL1, HIGH);
+  delay(1);
+  digitalWrite(XTAL1, LOW);
+  //give WR negative pulse and wait for RDY to go high
+  digitalWrite(WR, HIGH);
+  delay(1);
+  digitalWrite(WR, LOW);
+  // debug RDY
+  print("RDY: ");
+  println(digitalRead(RDY));
+  int count = 0;
+  while(digitalRead(RDY) == LOW & count<=10){
+    //Potential issue and hanging.  Need to debug.
+    delay(10);
     count++;
     // debug RDY
     print("RDY: ");
