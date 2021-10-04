@@ -163,6 +163,10 @@ void readFuses(){
   //Read Fuse Low Bit
   digitalWrite(XA1, LOW);//BS2
   digitalWrite(BS1, LOW);
+  //test with binary
+  Serial.print("LFUSE BIN: ");
+  Serial.println(PINB, BIN);
+  //show hex
   Serial.print("LFUSE: ");
   Serial.println(PINB);
   //Read Fuse High Bit
@@ -174,6 +178,11 @@ void readFuses(){
   digitalWrite(XA1, HIGH);//BS2
   digitalWrite(BS1, LOW);
   Serial.print("EFUSE: ");
+  Serial.println(PINB);
+  //Read Lock Bit
+  digitalWrite(XA1, LOW);//BS2
+  digitalWrite(BS1, HIGH);
+  Serial.print("LOCK BIT: ");
   Serial.println(PINB);
   //Finish Read
   DATAD = 0xFF; //Set digital pins to output for programming
@@ -199,10 +208,21 @@ void writeFuse(byte fuse, boolean highFuse){
   digitalWrite(WR, HIGH);
   delay(1);
   digitalWrite(WR, LOW);
-  while(digitalRead(RDY) == LOW){
+  // debug RDY
+  print("RDY: ");
+  println(digitalRead(RDY));
+  int count = 0;
+  while(digitalRead(RDY) == LOW & count<=20){
     //Potential issue and hanging.  Need to debug.
     delay(1);
+    count++;
+    // debug RDY
+    print("RDY: ");
+    println(digitalRead(RDY));
   }
+  // debug RDY
+  print("RDY: ");
+  println(digitalRead(RDY));
 }
 
 
