@@ -3,7 +3,7 @@
  * AVR High-Voltage Parallel Fuse Programmer for ATtiny2313
  * 
  * Author: M Grotaers
- * Date: 22/09/2021
+ * Date: 10/10/2021
  * 
  * The following people have inspired me to create this program and circuit design 
  * along with their reference:
@@ -23,8 +23,10 @@
 //Menu Control
 int menuOption = 0; // for incoming serial data
 
+byte TESTDATA;
+
 //Desired fuse configuration
-#define HFUSE 0xDF 
+#define HFUSE 0xDF
 #define LFUSE 0x64
 
 //Pin Assignment on Arduino
@@ -43,6 +45,8 @@ int menuOption = 0; // for incoming serial data
 
 
 void setup() {
+
+  TESTDATA = 0xFF;
   // Setup control line for HV parallel programming from Arduino perspective
   DATA = 0x00; // Clear digital pins 0-7
   DATAD = 0xFF; // Set digital pins 0-7 as outputs for programming
@@ -68,6 +72,7 @@ void setup() {
   Serial.println("Press '2' to program high and low fuse bits, and to read fuse and lock bits");
   Serial.println("Press '3' to read fuse and lock bits");
   Serial.println("Press '8' to conduct chip erase");
+  Serial.println("Press '6' to conduct binary test");
 }
 
 void loop() {
@@ -79,13 +84,14 @@ void loop() {
 
   // say what you got:
   if(menuOption == '1'){
-    Serial.println("Programming High and Low Fuse Bits");
+    Serial.println("Programming High and Low Fuse Bits");  
     //Enter Programming Mode
     enterProg();
     //In Programming Mode
     progFuses();
     //Exit Programming Mode
     exitProg();
+    Serial.println("Finish");
       
   } else if (menuOption == '2'){
     Serial.println("Programming High and Low Fuse Bits");
@@ -93,10 +99,13 @@ void loop() {
     //Enter Programming Mode
     enterProg();
     //In Programming Mode
+    Serial.println("Programming...");
     progFuses();  //program fuse bits
+    Serial.println("Reading...");
     readFuses(); //read fuse bits
     //Exit Programming Mode
     exitProg();
+    Serial.println("Finish");
     
   } else if (menuOption == '3'){
     Serial.println("Reading Fuse and Lock Bits");
@@ -106,18 +115,70 @@ void loop() {
     readFuses(); //read fuse bits
     //Exit Programming Mode
     exitProg();
+    Serial.println("Finish");
+    
   } else if (menuOption == '8'){
+    Serial.println("Chip Erase and Write Fuse");
     //Enter Programming Mode
     enterProg();
     //In Programming Mode conduct Chip Erase
     chipErase(); //conduct chip erase
+    progFuses();
     //Exit Programming Mode
     exitProg();
+    Serial.println("Finish");
    
+  } else if (menuOption == '6'){
+    Serial.println("Conduct Binary Test");
+    binaryTest();
+    Serial.println("Finish");
   }
   
   menuOption = 0;
 
+}
+
+void binaryTest(){
+
+  Serial.println("Initial Test 0xFF");
+  
+  Serial.print("TEST : ");
+  Serial.println(TESTDATA);
+
+  Serial.print("TEST BIN: ");
+  Serial.println(TESTDATA, BIN);
+  Serial.print("TEST DEC: ");
+  Serial.println(TESTDATA, DEC);
+  Serial.print("TEST HEX: ");
+  Serial.println(TESTDATA, HEX);
+
+  Serial.println("Initial Test 0x0C");
+
+  TESTDATA = 0x0C;
+
+  Serial.print("TEST : ");
+  Serial.println(TESTDATA);
+
+  Serial.print("TEST BIN: ");
+  Serial.println(TESTDATA, BIN);
+  Serial.print("TEST DEC: ");
+  Serial.println(TESTDATA, DEC);
+  Serial.print("TEST HEX: ");
+  Serial.println(TESTDATA, HEX);
+
+  Serial.println("Initial Test 0x12");
+
+  TESTDATA = 0x12;
+
+  Serial.print("TEST : ");
+  Serial.println(TESTDATA);
+
+  Serial.print("TEST BIN: ");
+  Serial.println(TESTDATA, BIN);
+  Serial.print("TEST DEC: ");
+  Serial.println(TESTDATA, DEC);
+  Serial.print("TEST HEX: ");
+  Serial.println(TESTDATA, HEX);
 }
 
 void enterProg(){
@@ -136,6 +197,7 @@ void enterProg(){
   digitalWrite(RST, LOW); //Apply +12V
   delayMicroseconds(10);  //Wait before changing prog_enable pins
   delayMicroseconds(300);  //Wait before any parallel programming commands
+
 }
 
 void exitProg(){
@@ -164,6 +226,7 @@ void progFuses(){
 }
 
 void readFuses(){
+
   loadCommand(B00000100);
   //Start Read
   DATAD = 0x00; //Set digital pins to input for reading
@@ -172,27 +235,24 @@ void readFuses(){
   //Read Fuse Low Bit
   digitalWrite(XA1, LOW);//BS2
   digitalWrite(BS1, LOW);
-  //test with binary
-  Serial.print("LFUSE BIN: ");
-  Serial.println(PINB, BIN);
   //show hex
   Serial.print("LFUSE: ");
-  Serial.println(PINB);
+  Serial.println(PINB, HEX);
   //Read Fuse High Bit
   digitalWrite(XA1, HIGH);//BS2
   digitalWrite(BS1, HIGH);
   Serial.print("HFUSE: ");
-  Serial.println(PINB);
+  Serial.println(PINB, HEX);
   //Read Fuse Extended Bit
   digitalWrite(XA1, HIGH);//BS2
   digitalWrite(BS1, LOW);
   Serial.print("EFUSE: ");
-  Serial.println(PINB);
+  Serial.println(PINB, HEX);
   //Read Lock Bit
   digitalWrite(XA1, LOW);//BS2
   digitalWrite(BS1, HIGH);
   Serial.print("LOCK BIT: ");
-  Serial.println(PINB);
+  Serial.println(PINB, HEX);
   //Finish Read
   DATAD = 0xFF; //Set digital pins to output for programming
   delayMicroseconds(5);
@@ -203,6 +263,7 @@ void readFuses(){
 }
 
 void writeFuse(byte fuse, boolean highFuse){
+  
   loadCommand(B01000000);
   loadDataByte(fuse);
   //select the fuse byte, see description above.
@@ -218,20 +279,21 @@ void writeFuse(byte fuse, boolean highFuse){
   delay(1);
   digitalWrite(WR, LOW);
   // debug RDY
-  print("RDY: ");
-  println(digitalRead(RDY));
+  Serial.print("Before RDY: ");
+  Serial.println(digitalRead(RDY));
   int count = 0;
-  while(digitalRead(RDY) == LOW & count<=10){
+  while(digitalRead(RDY) == LOW || count<=10){
     //Potential issue and hanging.  Need to debug.
-    delay(10);
+    delay(5);
     count++;
     // debug RDY
-    print("RDY: ");
-    println(digitalRead(RDY));
+    Serial.print(count);
+    Serial.print(" RDY: ");
+    Serial.println(digitalRead(RDY));
   }
   // debug RDY
-  print("RDY: ");
-  println(digitalRead(RDY));
+  Serial.print("After RDY: ");
+  Serial.println(digitalRead(RDY));
 }
 
 void chipErase(){
@@ -251,20 +313,21 @@ void chipErase(){
   delay(1);
   digitalWrite(WR, LOW);
   // debug RDY
-  print("RDY: ");
-  println(digitalRead(RDY));
+  Serial.print("RDY: ");
+  Serial.println(digitalRead(RDY));
   int count = 0;
-  while(digitalRead(RDY) == LOW & count<=10){
+  while(digitalRead(RDY) == LOW || count<=10){
     //Potential issue and hanging.  Need to debug.
-    delay(10);
+    delay(5);
     count++;
     // debug RDY
-    print("RDY: ");
-    println(digitalRead(RDY));
+    Serial.print(count);
+    Serial.print(" RDY: ");
+    Serial.println(digitalRead(RDY));
   }
   // debug RDY
-  print("RDY: ");
-  println(digitalRead(RDY));
+  Serial.print("After RDY: ");
+  Serial.println(digitalRead(RDY));
 }
 
 
