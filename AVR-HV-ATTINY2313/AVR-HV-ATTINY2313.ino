@@ -72,7 +72,6 @@ void setup() {
   Serial.println("Press '2' to program high and low fuse bits, and to read fuse and lock bits");
   Serial.println("Press '3' to read fuse and lock bits");
   Serial.println("Press '8' to conduct chip erase");
-  Serial.println("Press '6' to conduct binary test");
 }
 
 void loop() {
@@ -128,57 +127,10 @@ void loop() {
     exitProg();
     Serial.println("Finish");
    
-  } else if (menuOption == '6'){
-    Serial.println("Conduct Binary Test");
-    binaryTest();
-    Serial.println("Finish");
   }
   
   menuOption = 0;
 
-}
-
-void binaryTest(){
-
-  Serial.println("Initial Test 0xFF");
-  
-  Serial.print("TEST : ");
-  Serial.println(TESTDATA);
-
-  Serial.print("TEST BIN: ");
-  Serial.println(TESTDATA, BIN);
-  Serial.print("TEST DEC: ");
-  Serial.println(TESTDATA, DEC);
-  Serial.print("TEST HEX: ");
-  Serial.println(TESTDATA, HEX);
-
-  Serial.println("Initial Test 0x0C");
-
-  TESTDATA = 0x0C;
-
-  Serial.print("TEST : ");
-  Serial.println(TESTDATA);
-
-  Serial.print("TEST BIN: ");
-  Serial.println(TESTDATA, BIN);
-  Serial.print("TEST DEC: ");
-  Serial.println(TESTDATA, DEC);
-  Serial.print("TEST HEX: ");
-  Serial.println(TESTDATA, HEX);
-
-  Serial.println("Initial Test 0x12");
-
-  TESTDATA = 0x12;
-
-  Serial.print("TEST : ");
-  Serial.println(TESTDATA);
-
-  Serial.print("TEST BIN: ");
-  Serial.println(TESTDATA, BIN);
-  Serial.print("TEST DEC: ");
-  Serial.println(TESTDATA, DEC);
-  Serial.print("TEST HEX: ");
-  Serial.println(TESTDATA, HEX);
 }
 
 void enterProg(){
@@ -206,11 +158,12 @@ void exitProg(){
 
   //Turn off all outputs
   DATA = 0x00;
+  delayMicroseconds(5);
   DATAD = 0xFF; // Set digital pins 0-7 as outputs for programming
   delayMicroseconds(5);
   
   digitalWrite(OE, LOW); //Set to 1 if reading fuse bits
-  digitalWrite(WR, LOW); //prog_enable pin
+  digitalWrite(WR, HIGH); //prog_enable pin
   digitalWrite(XA1, LOW); //prog_enable pin
   digitalWrite(XA0, LOW); //prog_enable pin
   digitalWrite(BS1, LOW); //prog_enable pin
@@ -225,33 +178,39 @@ void progFuses(){
   writeFuse(LFUSE, false);
 }
 
-void readFuses(){
-
-  loadCommand(B00000100);
-  //Start Read
+void readFuses(char fuseType){
+  
   DATAD = 0x00; //Set digital pins to input for reading
   delayMicroseconds(5);
+  loadCommand(B00000100);
   digitalWrite(OE, HIGH);
-  //Read Fuse Low Bit
-  digitalWrite(XA1, LOW);//BS2
-  digitalWrite(BS1, LOW);
-  //show hex
-  Serial.print("LFUSE: ");
-  Serial.println(PINB, HEX);
-  //Read Fuse High Bit
-  digitalWrite(XA1, HIGH);//BS2
-  digitalWrite(BS1, HIGH);
-  Serial.print("HFUSE: ");
-  Serial.println(PINB, HEX);
-  //Read Fuse Extended Bit
-  digitalWrite(XA1, HIGH);//BS2
-  digitalWrite(BS1, LOW);
-  Serial.print("EFUSE: ");
-  Serial.println(PINB, HEX);
-  //Read Lock Bit
-  digitalWrite(XA1, LOW);//BS2
-  digitalWrite(BS1, HIGH);
-  Serial.print("LOCK BIT: ");
+  
+  switch (fuseType) {
+    case 'L':
+      //Read Fuse Low Byte
+      digitalWrite(XA1, LOW);//BS2
+      digitalWrite(BS1, LOW);
+      Serial.print("LFUSE: ");
+      break;
+    case 'H':
+      //Read Fuse High Bit
+      digitalWrite(XA1, HIGH);//BS2
+      digitalWrite(BS1, HIGH);
+      Serial.print("HFUSE: ");
+      break;
+    case 'E':
+      //Read Fuse Extended Bit
+      digitalWrite(XA1, HIGH);//BS2
+      digitalWrite(BS1, LOW);
+      Serial.print("EFUSE: ");
+      break;
+    case 'L':
+      //Read Lock Bit
+      digitalWrite(XA1, LOW);//BS2
+      digitalWrite(BS1, HIGH);
+      Serial.print("LOCK BIT: ");
+      break;
+  }
   Serial.println(PINB, HEX);
   //Finish Read
   DATAD = 0xFF; //Set digital pins to output for programming
@@ -259,7 +218,6 @@ void readFuses(){
   digitalWrite(OE, LOW);
   digitalWrite(XA1, LOW);
   digitalWrite(BS1, LOW);
-  
 }
 
 void writeFuse(byte fuse, boolean highFuse){
@@ -274,60 +232,12 @@ void writeFuse(byte fuse, boolean highFuse){
     //select low data byte
     digitalWrite(BS1, LOW);
   }
-  //give WR negative pulse and wait for RDY to go high
-  digitalWrite(WR, HIGH);
-  delay(1);
-  digitalWrite(WR, LOW);
-  // debug RDY
-  Serial.print("Before RDY: ");
-  Serial.println(digitalRead(RDY));
-  int count = 0;
-  while(digitalRead(RDY) == LOW || count<=10){
-    //Potential issue and hanging.  Need to debug.
-    delay(5);
-    count++;
-    // debug RDY
-    Serial.print(count);
-    Serial.print(" RDY: ");
-    Serial.println(digitalRead(RDY));
-  }
-  // debug RDY
-  Serial.print("After RDY: ");
-  Serial.println(digitalRead(RDY));
+  progDevice();
 }
 
 void chipErase(){
-  //Enable command loading
-  digitalWrite(XA1, HIGH);
-  digitalWrite(XA0, LOW);
-
-  digitalWrite(BS1, LOW);
-  //Write Command
-  DATA = B10000000;
-  //Load Command by giving XTAL1 positive pulse
-  digitalWrite(XTAL1, HIGH);
-  delay(1);
-  digitalWrite(XTAL1, LOW);
-  //give WR negative pulse and wait for RDY to go high
-  digitalWrite(WR, HIGH);
-  delay(1);
-  digitalWrite(WR, LOW);
-  // debug RDY
-  Serial.print("RDY: ");
-  Serial.println(digitalRead(RDY));
-  int count = 0;
-  while(digitalRead(RDY) == LOW || count<=10){
-    //Potential issue and hanging.  Need to debug.
-    delay(5);
-    count++;
-    // debug RDY
-    Serial.print(count);
-    Serial.print(" RDY: ");
-    Serial.println(digitalRead(RDY));
-  }
-  // debug RDY
-  Serial.print("After RDY: ");
-  Serial.println(digitalRead(RDY));
+  loadCommand(B10000000);
+  progDevice();
 }
 
 
@@ -336,14 +246,10 @@ void loadCommand (byte command){
   //Enable command loading
   digitalWrite(XA1, HIGH);
   digitalWrite(XA0, LOW);
-
   digitalWrite(BS1, LOW);
   //Write Command
   DATA = command;
-  //Load Command by giving XTAL1 positive pulse
-  digitalWrite(XTAL1, HIGH);
-  delay(1);
-  digitalWrite(XTAL1, LOW);
+  uploadDataCommand();
 }
 
 //C: Load Data Low Byte
@@ -353,9 +259,39 @@ void loadDataByte(byte fuseByte) {
   digitalWrite(XA0, HIGH);
   //Set Data Low Byte
   DATA = fuseByte;
+  uploadDataCommand();
+}
+
+void uploadDataCommand(){
   //Load Command by giving XTAL1 positive pulse
   digitalWrite(XTAL1, HIGH);
-  delay(1);
+  delayMicroseconds(1);
   digitalWrite(XTAL1, LOW);
+  delayMicroseconds(1);
 }
+
+void progDevice(){
+  //give WR negative pulse and wait for RDY to go high
+  digitalWrite(WR, HIGH);
+  delayMicroseconds(1);
+  digitalWrite(WR, LOW);
+  delayMicroseconds(1);
+  // debug RDY
+  Serial.print("RDY: ");
+  Serial.println(digitalRead(RDY));
+  int count = 0;
+  while(digitalRead(RDY) == LOW || count<=10){
+    //Potential issue and hanging.  Need to debug.
+    delayMicroseconds(100);
+    count++;
+  }
+  if (count==10){
+    Serial.print("RDY Timed Out: ");
+    Serial.println(digitalRead(RDY));
+  } else {
+    Serial.print("RDY End: ");
+    Serial.println(digitalRead(RDY));
+  }
+}
+  
 
