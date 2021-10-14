@@ -94,26 +94,75 @@ void loop() {
       
   } else if (menuOption == '2'){
     Serial.println("Programming High and Low Fuse Bits");
-    Serial.println("Reading Fuse and Lock Bits");
-    //Enter Programming Mode
     enterProg();
-    //In Programming Mode
-    Serial.println("Programming...");
-    progFuses();  //program fuse bits
-    Serial.println("Reading...");
-    readFuses(); //read fuse bits
-    //Exit Programming Mode
+    progFuses();
     exitProg();
+    
+    Serial.println("Reading Fuse and Lock Bits");
+    byte rFuse[4];
+    Serial.println();
+    //Read Low Fuse
+    enterProg();
+    rFuse[0] = readFuses('L');
+    exitProg();
+    //Read Low Fuse
+    enterProg();
+    rFuse[1] = readFuses('H');
+    exitProg();
+    //Read Extended Fuse
+    enterProg();
+    rFuse[2] = readFuses('E');
+    exitProg();
+    //Read Lock Bit
+    enterProg();
+    rFuse[3] = readFuses('B');
+    exitProg();
+    
+    //Print Values to Terminal
+    Serial.print("LFUSE: ");
+    Serial.println(rFuse[0], HEX);
+    Serial.print("HFUSE: ");
+    Serial.println(rFuse[1], HEX);
+    Serial.print("EFUSE: ");
+    Serial.println(rFuse[2], HEX);
+    Serial.print("LOCK BIT: ");
+    Serial.println(rFuse[3], HEX);
+    
+    Serial.println();
     Serial.println("Finish");
     
   } else if (menuOption == '3'){
+    byte rFuse[4];
     Serial.println("Reading Fuse and Lock Bits");
-    //Enter Programming Mode
+    Serial.println();
+    //Read Low Fuse
     enterProg();
-    //In Programming Mode
-    readFuses(); //read fuse bits
-    //Exit Programming Mode
+    rFuse[0] = readFuses('L');
     exitProg();
+    //Read Low Fuse
+    enterProg();
+    rFuse[1] = readFuses('H');
+    exitProg();
+    //Read Extended Fuse
+    enterProg();
+    rFuse[2] = readFuses('E');
+    exitProg();
+    //Read Lock Bit
+    enterProg();
+    rFuse[3] = readFuses('B');
+    exitProg();
+    
+    //Print Values to Terminal
+    Serial.print("LFUSE: ");
+    Serial.println(rFuse[0], HEX);
+    Serial.print("HFUSE: ");
+    Serial.println(rFuse[1], HEX);
+    Serial.print("EFUSE: ");
+    Serial.println(rFuse[2], HEX);
+    Serial.print("LOCK BIT: ");
+    Serial.println(rFuse[3], HEX);
+    
+    Serial.println();
     Serial.println("Finish");
     
   } else if (menuOption == '8'){
@@ -178,7 +227,9 @@ void progFuses(){
   writeFuse(LFUSE, false);
 }
 
-void readFuses(char fuseType){
+byte readFuses(char fuseType){
+  
+  byte fuseValue;
   
   DATAD = 0x00; //Set digital pins to input for reading
   delayMicroseconds(5);
@@ -190,34 +241,32 @@ void readFuses(char fuseType){
       //Read Fuse Low Byte
       digitalWrite(XA1, LOW);//BS2
       digitalWrite(BS1, LOW);
-      Serial.print("LFUSE: ");
       break;
     case 'H':
-      //Read Fuse High Bit
+      //Read Fuse High Byte
       digitalWrite(XA1, HIGH);//BS2
       digitalWrite(BS1, HIGH);
-      Serial.print("HFUSE: ");
       break;
     case 'E':
-      //Read Fuse Extended Bit
+      //Read Fuse Extended Byte
       digitalWrite(XA1, HIGH);//BS2
       digitalWrite(BS1, LOW);
-      Serial.print("EFUSE: ");
       break;
-    case 'L':
-      //Read Lock Bit
+    case 'B':
+      //Read Lock Bits
       digitalWrite(XA1, LOW);//BS2
       digitalWrite(BS1, HIGH);
-      Serial.print("LOCK BIT: ");
       break;
   }
-  Serial.println(PINB, HEX);
+  fuseValue = PINB;
   //Finish Read
   DATAD = 0xFF; //Set digital pins to output for programming
   delayMicroseconds(5);
   digitalWrite(OE, LOW);
   digitalWrite(XA1, LOW);
   digitalWrite(BS1, LOW);
+  
+  return fuseValue;
 }
 
 void writeFuse(byte fuse, boolean highFuse){
