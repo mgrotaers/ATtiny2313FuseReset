@@ -71,6 +71,7 @@ void setup() {
   Serial.println("Press '1' to program high and low fuse bits");
   Serial.println("Press '2' to program high and low fuse bits, and to read fuse and lock bits");
   Serial.println("Press '3' to read fuse and lock bits");
+  Serial.println("Press '4' to read device signature");
   Serial.println("Press '8' to conduct chip erase");
 }
 
@@ -165,14 +166,35 @@ void loop() {
     Serial.println();
     Serial.println("Finish");
     
+  } else if (menuOption == '4'){
+    byte rFuse[3];
+    Serial.println("Read Device Signature");
+    enterProg();
+    rFuse[0] = readDeviceSign(0x00);
+    exitProg();
+    enterProg();
+    rFuse[1] = readDeviceSign(0x01);
+    exitProg();
+    enterProg();
+    rFuse[2] = readDeviceSign(0x02);
+    exitProg();
+    
+    //Print Values to Terminal
+    Serial.print("0x00: ");
+    Serial.println(rFuse[0], HEX);
+    Serial.print("0x01: ");
+    Serial.println(rFuse[1], HEX);
+    Serial.print("0x02: ");
+    Serial.println(rFuse[2], HEX);
+    
+    Serial.println();
+    Serial.println("Finish");
+    
   } else if (menuOption == '8'){
     Serial.println("Chip Erase and Write Fuse");
-    //Enter Programming Mode
     enterProg();
-    //In Programming Mode conduct Chip Erase
     chipErase(); //conduct chip erase
     progFuses();
-    //Exit Programming Mode
     exitProg();
     Serial.println("Finish");
    
@@ -217,6 +239,7 @@ void exitProg(){
   digitalWrite(XA0, LOW); //prog_enable pin
   digitalWrite(BS1, LOW); //prog_enable pin
   digitalWrite(VCC, LOW);
+  delay(100);
 }
 
 void progFuses(){
@@ -267,6 +290,24 @@ byte readFuses(char fuseType){
   digitalWrite(BS1, LOW);
   
   return fuseValue;
+}
+
+byte readDeviceSign(byte signAddress){
+  
+  byte signValue;
+  delayMicroseconds(5);
+  DATAD = 0x00; //Set digital pins to input for reading
+  delayMicroseconds(5);
+  loadCommand(B00001000);
+  loadAddressByte(signAddress);
+  digitalWrite(OE, HIGH);
+  digitalWrite(BS1, LOW);
+  signValue = PINB;
+  DATAD = 0xFF; //Set digital pins to output for programming
+  delayMicroseconds(5);
+  digitalWrite(OE, LOW);
+  
+  return signValue;
 }
 
 void writeFuse(byte fuse, boolean highFuse){
