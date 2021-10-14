@@ -372,7 +372,7 @@ void progDevice(){
   int count = 0;
   while(digitalRead(RDY) == LOW || count<=10){
     //Potential issue and hanging.  Need to debug.
-    delayMicroseconds(100);
+    delayMicroseconds(1000);
     count++;
   }
   if (count==10){
